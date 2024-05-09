@@ -36,7 +36,7 @@ def home(request: Request):
 
 @app.get('/test')
 def test():
-    return {'dir': listdir(join(dirname(abspath(__file__)), 'data')), 'totosa': plants.get('totosa') }
+    return { 'totosa': get_plant_data('totosa') }
 
 @app.get('/plants/{plant}')
 def get_plant(plant):
