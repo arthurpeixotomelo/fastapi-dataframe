@@ -33,8 +33,9 @@ app = FastAPI()
 @app.on_event("startup")
 def startup_event():
     for plant in plants.keys():
-        plants[plant] = pd.read_csv(join(dirname(abspath(__file__))), 'data', f'{plant.title()}.csv', encoding='unicode_escape', engine='python').sort_values(by=['Data', 'Hora']).to_json(orient='records')
-
+        with open(join(dirname(abspath(__file__)), 'data', f'{plant.title()}.csv'), 'r') as f:
+            plants[plant] = pd.read_csv(f, encoding='unicode_escape', engine='python').sort_values(by=['Data', 'Hora']).to_json(orient='records')
+            
 templates = Jinja2Templates(directory='templates')
 
 @app.get('/', response_class=HTMLResponse)
