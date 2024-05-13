@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
     <title>Home</title>
 </head>
 <body>
@@ -11,17 +12,20 @@
     </header>
     <main>
         <section>
-            <img src="" alt="foto da planta">
-            <a href="/plants/excaulebur">
-                <h2>Excaulebur</h2>
-            </a>
+            <div>
+                <img src="/static/plant.jpg" alt="foto da planta">
+                <a href="/plants/excaulebur" hx-get="/plants/excaulebur" hx-trigger="click" hx-target="#info" hx-swap="outerHTML">
+                    <h2>Excaulebur</h2>
+                </a>
+            </div>
+            <div>
+                <img src="/static/plant.jpg" alt="foto da planta">
+                <a href="/plants/totosa" hx-get="/plants/totosa" hx-trigger="click" hx-target="#info" hx-swap="outerHTML">
+                    <h2>Totosa</h2>
+                </a>
+            </div>
         </section>
-        <section>
-            <img src="" alt="foto da planta">
-            <a href="/plants/totosa">
-                <h2>Totosa</h2>
-            </a>
-        </section>
+        <section id="info"></section>
     </main>
 </body>
 <style>
@@ -29,6 +33,37 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+    }
+
+    header {
+        h1 {
+            text-align: center;
+        }
+    }
+
+
+    main section {
+        &:first-child {
+            display: flex;
+            border: 1px solid red;
+            justify-content: space-evenly;
+        }
+
+        & div {
+            position: relative;
+            
+            & a {
+                inset: 0;
+                display: flex;
+                color: inherit;
+                position: absolute;
+                align-items: center;
+                justify-content: end;
+                text-decoration: none;
+                flex-direction: column;
+                border: 2px solid black;
+            }
+        }
     }
 </style>
 </html>

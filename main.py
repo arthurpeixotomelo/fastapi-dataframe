@@ -1,13 +1,11 @@
 from os import listdir
 from os.path import join, dirname, abspath
-from contextlib import asynccontextmanager
 
 import pandas as pd
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
-plants = {'excaulebur': None, 'totosa': None}
 
 def get_plant_data(plant):
     df = pd.concat([get_file_data(file, plant) for file in listdir(join(dirname(abspath(__file__)), 'data'))])
@@ -20,25 +18,26 @@ def get_file_data(file, plant):
             df['Data'] = file.split('.')[0][-10:]
             return df[['Valor do sinal', 'Temperatura', 'Umidade', 'Data', 'Hora']]
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    for plant in plants.keys():
-        plants[plant] = get_plant_data(plant)
-    yield
+app = FastAPI()
 
-app = FastAPI(lifespan=lifespan)
-            
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
 templates = Jinja2Templates(directory='templates')
 
 @app.get('/', response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(request=request, name='index.html')
 
-@app.get('/test')
-def test():
-    return { 'totosa': get_plant_data('totosa') }
-
-@app.get('/plants/{plant}')
+@app.get('/plants/{plant}', response_class=HTMLResponse)
 def get_plant(plant):
-    with open(join(dirname(abspath(__file__)), 'data', f'{plant.title()}.csv'), 'r') as f:
-        return pd.read_csv(f, encoding='unicode_escape', engine='python').sort_values(by=['Data', 'Hora']).to_json(orient='records')
+    return f'''
+        <section id="info">
+            <p>info about {plant}</p>
+            <a href="plants/{plant}/data">check the data</>
+        </section>
+    '''
+
+@app.get('/plants/{plant}/data')
+def get_data(plant):
+    return get_plant_data(plant)
