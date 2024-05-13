@@ -7,9 +7,14 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-def get_plant_data(plant):
+def concat_plant_data(plant):
     df = pd.concat([get_file_data(file, plant) for file in listdir(join(dirname(abspath(__file__)), 'data'))])
     return df.sort_values(by=['Data', 'Hora']).to_json(orient='records')
+
+def get_plant_data(plant):
+    with open(join(dirname(abspath(__file__)), 'data', f'{plant.title()}.csv'), 'r') as f:
+        df = pd.read_csv(f, encoding='unicode_escape', engine='python')
+        return df.sort_values(by=['Data', 'Hora']).to_json(orient='records')
 
 def get_file_data(file, plant):
     if file.split('_')[0] == plant.title():
