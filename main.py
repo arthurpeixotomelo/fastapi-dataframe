@@ -64,7 +64,7 @@ def get_info(plant):
 @app.get('/plants/{plant}/table', response_class=HTMLResponse)
 async def get_table(plant):
     # res = await client.get(f'http://127.0.0.1:8000/plants/{plant}/data')
-    res = await client.get(f'http://fastapi-dataframe.vercel.app/plants/{plant}/data')
+    res = await client.get(f'https://fastapi-dataframe.vercel.app/plants/{plant}/data')
     df = pd.read_json(StringIO(loads(res.content)))
     return f'''
         <table>
