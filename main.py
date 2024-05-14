@@ -5,13 +5,13 @@ from datetime import datetime
 from os.path import join, dirname, abspath
 
 import pandas as pd
-from httpx import AsyncClient
+from httpx import AsyncClient, Timeout
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-client = AsyncClient()
+client = AsyncClient(timeout=Timeout(15.0, read=30.0))
 
 plants = {
     'excaulebur': {
