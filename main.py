@@ -1,12 +1,17 @@
 from os import listdir
+from json import loads
+from io import StringIO
 from datetime import datetime
 from os.path import join, dirname, abspath
 
 import pandas as pd
+from httpx import AsyncClient
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
+client = AsyncClient()
 
 plants = {
     'excaulebur': {
@@ -46,18 +51,20 @@ def home(request: Request):
     return templates.TemplateResponse(request=request, name='index.html')
 
 @app.get('/plants/{plant}/info', response_class=HTMLResponse)
-def get_plant_info(plant):
+def get_info(plant):
     return f'''
         <section id="info">
             <p>info about {plant}</p>
-            <button hx-get="plants/{plant}/table">check the data</button>
+            <button hx-get="plants/{plant}/table" hx-target="#table" hx-swap="outerHTML"" hx-indicator="#table">check the data</button>
+            <div id="table" class="htmx-indicator">loading...</div>
         </section>
     '''
 
 
 @app.get('/plants/{plant}/table', response_class=HTMLResponse)
-def get_plant_table(plant):
-    df = get_plant_data(plant).head(50)
+async def get_table(plant):
+    res = await client.get(f'http://127.0.0.1:8000/plants/{plant}/data')
+    df = pd.read_json(StringIO(loads(res.content)))
     return f'''
         <table>
             <tbody>
@@ -87,6 +94,5 @@ def get_plant_table(plant):
     '''
 
 @app.get('/plants/{plant}/data')
-def get_plant_data(plant):
-    df = get_plant_data(plant)
-    return df.to_json(orient='records')
+def get_data(plant):
+    return get_plant_data(plant).to_json(orient='records')
