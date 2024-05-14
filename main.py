@@ -57,7 +57,7 @@ def get_plant_info(plant):
 
 @app.get('/plants/{plant}/table', response_class=HTMLResponse)
 def get_plant_table(plant):
-    df = get_plant_data(plant)
+    df = get_plant_data(plant).head(50)
     return f'''
         <table>
             <tbody>
@@ -88,4 +88,5 @@ def get_plant_table(plant):
 
 @app.get('/plants/{plant}/data')
 def get_plant_data(plant):
-    return get_plant_data(plant).to_json(orient='records')
+    df = get_plant_data(plant)
+    return df.to_json(orient='records')
