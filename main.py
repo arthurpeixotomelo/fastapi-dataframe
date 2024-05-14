@@ -1,5 +1,5 @@
 from os import listdir
-from json import loads
+from ujson import loads
 from io import StringIO
 from datetime import datetime
 from os.path import join, dirname, abspath
