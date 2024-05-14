@@ -20,8 +20,9 @@ plants = {
 }
 
 def get_plant_data(plant):
-    with open(join(dirname(abspath(__file__)), 'data', f'{plant.title()}.csv'), 'r') as f: 
-        return pd.read_csv(f, encoding='unicode_escape', engine='python')
+    with open(join(dirname(abspath(__file__)), 'data', f'{plant.title()}.csv'), 'r') as f:
+        df = pd.read_csv(f, encoding='unicode_escape', engine='python')
+        return df.sort_values(by=['Data', 'Hora'])
 
 def concat_plant_data(plant):
     df = pd.concat([get_file_data(file, plant) for file in listdir(join(dirname(abspath(__file__)), 'data'))])
