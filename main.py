@@ -11,11 +11,17 @@ from fastapi.templating import Jinja2Templates
 plants_dict = {
     'excaulebur': {
         'nome': 'Excalibur',
-        'especie': 'Dracaena Trifasciata'
+        'especie': 'Dracaena Trifasciata',
+        'temp': {'min': 21.6, 'max': 29.1},
+        'umid': {'min': 48, 'max': 75},
+        'signal': {'min': -1.0, 'max': 0.82421875},
     },
     'totosa': {
         'nome': 'Totosa',
-        'especie': 'Portulacaria Afra'
+        'especie': 'Portulacaria Afra',
+        'temp': {'min': 24.7, 'max': 28.7},
+        'umid': {'min': 60, 'max': 75},
+        'signal': {'min': -1.0, 'max': 95.7734375},
     }
 }
 
@@ -47,7 +53,7 @@ def home(request: Request):
 
 @app.get('/plants/{plant}/info', response_class=HTMLResponse)
 def get_info(plant):
-    df = get_plant_data(plant)
+    df = get_plant_data(plant, limit=1000)
     df['Temperatura'] = df['Temperatura'].apply(lambda x: float(x[:4]))
     df['Umidade'] = df['Umidade'].apply(lambda x: int(x[:2]))
     return f'''
@@ -56,15 +62,15 @@ def get_info(plant):
             <div>
                 <div>
                     <p>Nome: {plants_dict.get(plant).get('nome')}</p>
-                    <p>Temperatura Mínima Registrada: {df['Temperatura'].min()}ºC</p>
-                    <p>Umidade Mínima Registrada: {df['Umidade'].min()}%</p>
-                    <p>Valor do Sinal Mínimo Registrado: {df['Valor do sinal'].min()}</p>
+                    <p>Temperatura Mínima Registrada: {plants_dict.get(plant).get('temp').get('min')}ºC</p>
+                    <p>Umidade Mínima Registrada: {plants_dict.get(plant).get('umid').get('min')}%</p>
+                    <p>Valor do Sinal Mínimo Registrado: {plants_dict.get(plant).get('signal').get('min')}</p>
                 </div>
                 <div>
                     <p>Especie: {plants_dict.get(plant).get('especie')}</p>
-                    <p>Temperatura Máxima Registrada: {df['Temperatura'].max()}ºC</p>
-                    <p>Umidade Máxima Registrada: {df['Umidade'].max()}%</p>
-                    <p>Valor do Sinal Máximo Registrado: {df['Valor do sinal'].max()}</p>
+                    <p>Temperatura Máxima Registrada: {plants_dict.get(plant).get('temp').get('max')}ºC</p>
+                    <p>Umidade Máxima Registrada: {plants_dict.get(plant).get('umid').get('max')}%</p>
+                    <p>Valor do Sinal Máximo Registrado: {plants_dict.get(plant).get('signal').get('max')}</p>
                 </div>
             </div>
             <div>
