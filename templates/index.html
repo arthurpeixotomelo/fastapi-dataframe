@@ -7,29 +7,31 @@
     <title>Home</title>
 </head>
 <body>
-    <header>
-        <h1>PI - Talking Plants</h1>
-    </header>
+    <!-- <header>
+    </header> -->
     <main>
+        <h1>PI - Talking Plants</h1>
         <section>
             <div>
-                <img src="/static/plant.jpg" alt="foto da planta">
-                <a href="/plants/excaulebur/info" hx-get="/plants/excaulebur/info" hx-trigger="click" hx-target="#info" hx-swap="outerHTML">
+                <img src="/static/Excaulebur.jpg" alt="foto da planta excaulebur">
+                <a href="/plants/excaulebur/info" hx-get="/plants/excaulebur/info" hx-trigger="click" hx-target="#info" hx-swap="outerHTML" hx-indicator="#info">
                     <h2>Excaulebur</h2>
                 </a>
             </div>
             <div>
-                <img src="/static/plant.jpg" alt="foto da planta">
-                <a href="/plants/totosa/info" hx-get="/plants/totosa/info" hx-trigger="click" hx-target="#info" hx-swap="outerHTML">
+                <img src="/static/Totosa.jpg" alt="foto da planta totosa">
+                <a href="/plants/totosa/info" hx-get="/plants/totosa/info" hx-trigger="click" hx-target="#info" hx-swap="outerHTML" hx-indicator="#info">
                     <h2>Totosa</h2>
                 </a>
             </div>
         </section>
-        <section id="info"></section>
+        <section id="info" class="htmx-indicator">Carregando...</section>
     </main>
 </body>
 <style>
     html, body {
+        overflow: hidden;
+
         &, * {
             margin: 0;
             padding: 0;
@@ -42,30 +44,90 @@
         }
     }
 
-    header {
-        h1 {
+    main {
+        gap: 1rem;
+        /* height: 100vh; */
+        display: flex;
+        flex-direction: column;
+        /* background: linear-gradient(to top right, #fcfcbb, #b3f592); */
+
+        & h1 {
             text-align: center;
         }
-    }
 
-
-    main section {
-        &:first-child {
+        & section:first-of-type {
+            width: 100%;
             display: flex;
-            border: 1px solid red;
             justify-content: space-evenly;
-        }
 
-        & div {
-            position: relative;
-            
-            & a {
-                inset: 0;
+            & div {
+                color: white;
+                position: relative;
+
+                & img {
+                    width: 180px;
+                    height: 180px;
+                    border-radius: 18%;
+                }
+                
+                & a {
+                    inset: 0;
+                    display: flex;
+                    position: absolute;
+                    border-radius: 18%;
+                    align-items: center;
+                    justify-content: end;
+                    flex-direction: column;
+                    background: linear-gradient(to top, rgba(0, 0, 0, .6), rgba(0, 0, 0, .1));
+                }
+            }
+        }
+        
+        & section:last-of-type {
+            gap: .5rem;
+            display: flex;
+            text-align: center;
+            flex-direction: column;
+
+            & div {
                 display: flex;
-                position: absolute;
-                align-items: center;
-                justify-content: end;
-                flex-direction: column;
+                justify-content: space-around;
+
+                & div {
+                    display: flex;
+                    flex-direction: column;
+
+                    & p {
+                        margin-inline: auto;
+                    }
+                }
+            }
+            
+            & div:has(table) {
+                height: 250px;
+                overflow-y: scroll;
+                margin-block: .5rem;
+
+                & table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    
+                    & th {
+                        top: 0;
+                        z-index: 2;
+                        position: sticky;
+                        background-color: #f2f2f2;
+                    }
+        
+                    & th, td {
+                        padding: 10px;
+                        text-align: center;
+                    }
+
+                    & tr:nth-child(odd) {
+                        background-color: #f2f2f2;
+                    }
+                }
             }
         }
     }

@@ -1,44 +1,39 @@
 from os import listdir
-from ujson import loads
-from io import StringIO
 from datetime import datetime
 from os.path import join, dirname, abspath
 
 import pandas as pd
-from httpx import AsyncClient, Timeout
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-client = AsyncClient(timeout=Timeout(15.0, read=30.0))
-
-plants = {
+plants_dict = {
     'excaulebur': {
-        'genero': {},
-        'especie': {}
+        'nome': 'Excalibur',
+        'especie': 'Dracaena Trifasciata'
     },
     'totosa': {
-        'genero': {},
-        'especie': {}
+        'nome': 'Totosa',
+        'especie': 'Portulacaria Afra'
     }
 }
 
-def get_plant_data(plant):
+def get_plant_data(plant, limit=None):
     with open(join(dirname(abspath(__file__)), 'data', f'{plant.title()}.csv'), 'r') as f:
-        df = pd.read_csv(f, encoding='unicode_escape', engine='python')
+        df = pd.read_csv(f, nrows=limit)
         return df.sort_values(by=['Data', 'Hora'])
-
-def concat_plant_data(plant):
-    df = pd.concat([get_file_data(file, plant) for file in listdir(join(dirname(abspath(__file__)), 'data'))])
-    return df.sort_values(by=['Data', 'Hora']).to_csv(f'./data/{plant.title()}.csv', index=False)
 
 def get_file_data(file, plant):
     if file.split('_')[0] == plant.title():
         with open(join(dirname(abspath(__file__)), 'data', file), 'r') as f:
-            df = pd.read_csv(f, encoding='unicode_escape', engine='python')
+            df = pd.read_csv(f)
             df['Data'] = file.split('.')[0][-10:]
             return df[['Valor do sinal', 'Temperatura', 'Umidade', 'Data', 'Hora']]
+        
+def concat_plant_data(plant):
+    df = pd.concat([get_file_data(file, plant) for file in listdir(join(dirname(abspath(__file__)), 'data'))])
+    return df.sort_values(by=['Data', 'Hora']).to_csv(f'./data/{plant.title()}.csv', index=False)
 
 app = FastAPI()
 
@@ -52,46 +47,54 @@ def home(request: Request):
 
 @app.get('/plants/{plant}/info', response_class=HTMLResponse)
 def get_info(plant):
+    df = get_plant_data(plant)
+    df['Temperatura'] = df['Temperatura'].apply(lambda x: float(x[:4]))
+    df['Umidade'] = df['Umidade'].apply(lambda x: int(x[:2]))
     return f'''
         <section id="info">
-            <p>info about {plant}</p>
-            <button hx-get="plants/{plant}/table" hx-target="#table" hx-swap="outerHTML"" hx-indicator="#table">check the data</button>
-            <div id="table" class="htmx-indicator">loading...</div>
+            <h3>Informações da planta</h3>
+            <div>
+                <div>
+                    <p>Nome: {plants_dict.get(plant).get('nome')}</p>
+                    <p>Temperatura Mínima Registrada: {df['Temperatura'].min()}ºC</p>
+                    <p>Umidade Mínima Registrada: {df['Umidade'].min()}%</p>
+                    <p>Valor do Sinal Mínimo Registrado: {df['Valor do sinal'].min()}</p>
+                </div>
+                <div>
+                    <p>Especie: {plants_dict.get(plant).get('especie')}</p>
+                    <p>Temperatura Máxima Registrada: {df['Temperatura'].max()}ºC</p>
+                    <p>Umidade Máxima Registrada: {df['Umidade'].max()}%</p>
+                    <p>Valor do Sinal Máximo Registrado: {df['Valor do sinal'].max()}</p>
+                </div>
+            </div>
+            <div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <th>Valor do sinal</th>
+                            <th>Temperatura</th>
+                            <th>Umidade</th>
+                            <th>Data</th>
+                            <th>Hora</th>
+                        </tr>
+                        {
+                            ''.join([
+                                f"""
+                                    <tr>
+                                        <td>{row[0]}</td>
+                                        <td>{row[1]}</td>
+                                        <td>{row[2]}</td>
+                                        <td>{row[3]}</td>
+                                        <td>{row[4]}</td>
+                                    </tr>
+                                """
+                                for row in zip(df['Valor do sinal'], df['Temperatura'], df['Umidade'], df['Data'], df['Hora'])
+                            ])
+                        }
+                    </tbody>
+                </table>
+            </div>
         </section>
-    '''
-
-
-@app.get('/plants/{plant}/table', response_class=HTMLResponse)
-async def get_table(plant):
-    # res = await client.get(f'http://127.0.0.1:8000/plants/{plant}/data')
-    res = await client.get(f'https://fastapi-dataframe.vercel.app/plants/{plant}/data')
-    df = pd.read_json(StringIO(loads(res.content)))
-    return f'''
-        <table>
-            <tbody>
-                <tr>
-                    <td>Valor do sinal</td>
-                    <td>Temperatura</td>
-                    <td>Umidade</td>
-                    <td>Data</td>
-                    <td>Hora</td>
-                </tr>
-                {
-                    ''.join([
-                        f"""
-                            <tr>
-                                <td>{row[0]}</td>
-                                <td>{row[1].replace('Â', '')}</td>
-                                <td>{row[2]}</td>
-                                <td>{datetime.strptime(row[3], '%Y-%m-%d').strftime('%d/%m/%Y')}</td>
-                                <td>{row[4]}</td>
-                            </tr>
-                        """
-                        for row in zip(df['Valor do sinal'], df['Temperatura'], df['Umidade'], df['Data'], df['Hora'])
-                    ])
-                }
-            </tbody>
-        </table>
     '''
 
 @app.get('/plants/{plant}/data')
