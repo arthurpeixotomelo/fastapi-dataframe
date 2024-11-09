@@ -23,7 +23,7 @@
                 </a>
             </div>
         </section>
-        <section id="info" class="htmx-indicator">Carregando...</section>
+        <section id="info" class="htmx-indicator"><b>Carregando...</b></section>
     </main>
 </body>
 <style>
@@ -44,6 +44,7 @@
 
     main {
         gap: 1rem;
+        height: 100vh;
         display: flex;
         flex-direction: column;
 
@@ -61,8 +62,8 @@
                 position: relative;
 
                 & img {
-                    width: 180px;
-                    height: 180px;
+                    width: 10rem;
+                    height: 10rem;
                     border-radius: 18%;
                 }
                 
@@ -100,7 +101,8 @@
             }
             
             & div:has(table) {
-                height: 250px;
+                height: 15rem;
+
                 overflow-y: scroll;
                 margin-block: .5rem;
 
@@ -108,20 +110,19 @@
                     width: 100%;
                     border-collapse: collapse;
                     
-                    & th {
-                        top: 0;
-                        z-index: 2;
-                        position: sticky;
-                        background-color: #f2f2f2;
-                    }
-        
                     & th, td {
-                        padding: 10px;
+                        padding: .5rem;
                         text-align: center;
                     }
 
+                    & tr:first-child {
+                        top: 0;
+                        z-index: 2;
+                        position: sticky;
+                    }
+
                     & tr:nth-child(odd) {
-                        background-color: #f2f2f2;
+                        background-color: #ececec
                     }
                 }
             }
