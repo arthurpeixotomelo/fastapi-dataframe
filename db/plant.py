@@ -45,7 +45,7 @@ def create_database_file():
 
 def fetch_sensor_data(session: AnnotatedSession, table_name: Optional[str] = PlantData.__tablename__, plant_name: Optional[str] = None) -> DataFrame:
     if plant_name:
-        df = read_sql_table(table_name, session.bind, chunksize=20000).query(f'plant_name = {plant_name}')
+        df = read_sql_table(table_name, session.bind, chunksize=10000).query(f'plant_name = {plant_name}')
     else:
-        df = read_sql_table(table_name, session.bind, chunksize=20000)
+        df = read_sql_table(table_name, session.bind, chunksize=10000)
     return df

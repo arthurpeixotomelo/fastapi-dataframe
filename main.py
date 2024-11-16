@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
 
 from db.plant import AnnotatedSession, create_database_metadata, fetch_sensor_data
@@ -16,6 +17,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
+
+app.add_middleware(GZipMiddleware)
 
 @app.get('/', response_class=HTMLResponse)
 async def home(request: Request):
